@@ -13,6 +13,7 @@ import edu.wpi.first.wpilibj.IterativeRobot;
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.RobotDrive;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import edu.wpi.first.wpilibj.AnalogModule;
 
 /**
  * The VM is configured to automatically run this class, and to call the
@@ -23,6 +24,7 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
  */
 public class RobotTemplate extends IterativeRobot {
         RobotDrive chassis = new RobotDrive(1, 2);
+        AnalogModule exampleAnalog;
         Joystick driveStick = new Joystick(1);
         double counter;
         
@@ -30,6 +32,7 @@ public class RobotTemplate extends IterativeRobot {
 
     public RobotTemplate() {
         this.counter = 0.0;
+        
     }
 
         
@@ -39,8 +42,9 @@ public class RobotTemplate extends IterativeRobot {
      * used for any initialization code.
      */
     public void robotInit() {
-chassis.setInvertedMotor(RobotDrive.MotorType.kRearRight, true);
-chassis.setInvertedMotor(RobotDrive.MotorType.kRearLeft, true);
+        chassis.setInvertedMotor(RobotDrive.MotorType.kRearRight, true);
+        chassis.setInvertedMotor(RobotDrive.MotorType.kRearLeft, true);
+        exampleAnalog = AnalogModule.getInstance(1);
 
     }
     public void autonomousInit() {
@@ -74,6 +78,8 @@ chassis.setInvertedMotor(RobotDrive.MotorType.kRearLeft, true);
      */
     public void teleopPeriodic() {
         SmartDashboard.putNumber("Counter", counter++);
+        SmartDashboard.putNumber("Ultrasonic Value", exampleAnalog.getValue(1));
+        SmartDashboard.putNumber("Voltage", exampleAnalog.getVoltage(1));
         chassis.setSafetyEnabled(true);
         chassis.arcadeDrive(driveStick);
         
