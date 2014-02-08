@@ -14,6 +14,8 @@ import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.RobotDrive;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj.AnalogModule;
+import edu.wpi.first.wpilibj.Servo;
+
 
 /**
  * The VM is configured to automatically run this class, and to call the
@@ -26,7 +28,12 @@ public class RobotTemplate extends IterativeRobot {
         RobotDrive chassis = new RobotDrive(1, 2);
         AnalogModule exampleAnalog;
         Joystick driveStick = new Joystick(1);
+        Joystick camStick = new Joystick(2);
         double counter;
+        Servo camPan = new Servo(3);
+        Servo camTilt = new Servo(4);
+        double tiltIn;
+        double panIn;
         
         int m_autoPeriodicLoops;
 
@@ -82,8 +89,12 @@ public class RobotTemplate extends IterativeRobot {
         SmartDashboard.putNumber("Voltage", exampleAnalog.getVoltage(1));
         chassis.setSafetyEnabled(true);
         chassis.arcadeDrive(driveStick);
+        tiltIn = (camStick.getY() +0.5);
+        camTilt.set(tiltIn);
+        panIn = (camStick.getX() +0.5 );
+        camPan.set(panIn);
         
-     
+          
     }
     
         
