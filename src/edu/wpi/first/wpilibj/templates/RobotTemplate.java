@@ -15,6 +15,8 @@ import edu.wpi.first.wpilibj.RobotDrive;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj.AnalogModule;
 import edu.wpi.first.wpilibj.Servo;
+import edu.wpi.first.wpilibj.Victor;
+import edu.wpi.first.wpilibj.Relay;
 
 
 /**
@@ -29,6 +31,8 @@ public class RobotTemplate extends IterativeRobot {
         AnalogModule exampleAnalog;
         Joystick driveStick = new Joystick(1);
         Joystick camStick = new Joystick(2);
+        Victor armLow = new Victor(5);
+        Relay armUp = new Relay(1);
         double counter;
         Servo camPan = new Servo(3);
         Servo camTilt = new Servo(4);
@@ -93,8 +97,17 @@ public class RobotTemplate extends IterativeRobot {
         camTilt.set(tiltIn);
         panIn = (camStick.getX() +0.5 );
         camPan.set(panIn);
-        
-          
+        if(camStick.getRawButton(3)){
+            armUp.set(Relay.Value.kForward);    
+        } 
+        else if(camStick.getRawButton(2)){
+            armUp.set(Relay.Value.kReverse);
+        }
+        else{
+            armUp.set(Relay.Value.kOff);
+        }
+            
+  
     }
     
         
