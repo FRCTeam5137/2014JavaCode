@@ -17,6 +17,7 @@ import edu.wpi.first.wpilibj.AnalogModule;
 import edu.wpi.first.wpilibj.Servo;
 import edu.wpi.first.wpilibj.Victor;
 import edu.wpi.first.wpilibj.Relay;
+import edu.wpi.first.wpilibj.Gyro;
 
 
 /**
@@ -40,7 +41,7 @@ public class RobotTemplate extends IterativeRobot {
         double panIn;
         
         int m_autoPeriodicLoops;
-
+        int relayCounter;
     public RobotTemplate() {
         this.counter = 0.0;
         
@@ -98,13 +99,23 @@ public class RobotTemplate extends IterativeRobot {
         panIn = (camStick.getX() +0.5 );
         camPan.set(panIn);
         if(camStick.getRawButton(3)){
-            armUp.set(Relay.Value.kForward);    
+            relayCounter++;
+            armUp.set(Relay.Value.kForward);  
         } 
         else if(camStick.getRawButton(2)){
             armUp.set(Relay.Value.kReverse);
         }
         else{
             armUp.set(Relay.Value.kOff);
+        }
+         if(camStick.getRawButton(4)){
+            armLow.set(1);    
+        } 
+        else if(camStick.getRawButton(5)){
+            armLow.set(-1);
+        }
+        else{
+            armLow.set(0);
         }
             
   
