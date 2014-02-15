@@ -17,7 +17,7 @@ import edu.wpi.first.wpilibj.AnalogModule;
 import edu.wpi.first.wpilibj.Servo;
 import edu.wpi.first.wpilibj.Victor;
 import edu.wpi.first.wpilibj.Relay;
-import edu.wpi.first.wpilibj.Gyro;
+import edu.wpi.first.wpilibj.DigitalInput;
 
 
 /**
@@ -33,7 +33,11 @@ public class RobotTemplate extends IterativeRobot {
         Joystick driveStick = new Joystick(1);
         Joystick camStick = new Joystick(2);
         Victor armLow = new Victor(5);
-        Relay armUp = new Relay(1);
+        Relay armVertical = new Relay(1);
+        DigitalInput extendedLimit = new DigitalInput(1);
+        DigitalInput retractedLimit = new DigitalInput(2);
+        boolean vertArmLower = false;
+        boolean vertArmRaise = false;
         double counter;
         Servo camPan = new Servo(3);
         Servo camTilt = new Servo(4);
@@ -57,6 +61,8 @@ public class RobotTemplate extends IterativeRobot {
         chassis.setInvertedMotor(RobotDrive.MotorType.kRearRight, true);
         chassis.setInvertedMotor(RobotDrive.MotorType.kRearLeft, true);
         exampleAnalog = AnalogModule.getInstance(1);
+        vertArmLower = false;
+        vertArmRaise = false;
 
     }
     public void autonomousInit() {
@@ -92,23 +98,44 @@ public class RobotTemplate extends IterativeRobot {
         SmartDashboard.putNumber("Counter", counter++);
         SmartDashboard.putNumber("Ultrasonic Value", exampleAnalog.getValue(1));
         SmartDashboard.putNumber("Voltage", exampleAnalog.getVoltage(1));
+        
         chassis.setSafetyEnabled(true);
         chassis.arcadeDrive(driveStick);
+        
         tiltIn = (camStick.getY() +0.5);
         camTilt.set(tiltIn);
         panIn = (camStick.getX() +0.5 );
         camPan.set(panIn);
-        if(camStick.getRawButton(3)){
-            relayCounter++;
-            armUp.set(Relay.Value.kForward);  
-        } 
-        else if(camStick.getRawButton(2)){
-            armUp.set(Relay.Value.kReverse);
+        
+        /* 
+           Vertical arm
+        */
+        vertArmLower = false;
+        vertArmRaise = false;
+        
+        /* Button 2 lowers arm */
+        if (camStick.getRawButton(2) && retractedLimit.get()) {
+            vertArmLower = true;
         }
-        else{
-            armUp.set(Relay.Value.kOff);
+        /* Button 3 Raises arm */
+        else if (camStick.getRawButton(3) && extendedLimit.get()) {
+            vertArmRaise = true;
         }
-         if(camStick.getRawButton(4)){
+        
+        /* Raise or lower arm */
+        if (vertArmLower) {
+            /* If limit not reached, set motor to reverse */
+            armVertical.set(Relay.Value.kReverse);
+        }
+        else if (vertArmRaise) {
+            armVertical.set(Relay.Value.kForward);
+        }
+        else {
+            /* Stop motor if limit reached or neither button pressed */
+            armVertical.set(Relay.Value.kOff);
+        }
+
+         /*if(camStick.getRawButton(4)){
             armLow.set(1);    
         } 
         else if(camStick.getRawButton(5)){
@@ -116,7 +143,7 @@ public class RobotTemplate extends IterativeRobot {
         }
         else{
             armLow.set(0);
-        }
+        }*/
             
   
     }
