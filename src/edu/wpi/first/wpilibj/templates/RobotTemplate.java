@@ -32,12 +32,21 @@ public class RobotTemplate extends IterativeRobot {
         AnalogModule exampleAnalog;
         Joystick driveStick = new Joystick(1);
         Joystick camStick = new Joystick(2);
-        Victor armLow = new Victor(5);
+        Victor armLeft = new Victor(5);
+        Victor armRight = new Victor(6);
         Relay armVertical = new Relay(1);
         DigitalInput extendedLimit = new DigitalInput(1);
         DigitalInput retractedLimit = new DigitalInput(2);
+        DigitalInput leftExtendedLimit = new DigitalInput(4);
+        DigitalInput leftRetractedLimit = new DigitalInput(3);
+        DigitalInput rightExtendedLimit = new DigitalInput(5);
+        DigitalInput rightRetractedLimit = new DigitalInput(6);
         boolean vertArmLower = false;
         boolean vertArmRaise = false;
+        boolean leftArmRetract = false;
+        boolean leftArmExtend = false;
+        boolean rightArmRetract = false;
+        boolean rightArmExtend = false; 
         double counter;
         Servo camPan = new Servo(3);
         Servo camTilt = new Servo(4);
@@ -124,7 +133,6 @@ public class RobotTemplate extends IterativeRobot {
         
         /* Raise or lower arm */
         if (vertArmLower) {
-            /* If limit not reached, set motor to reverse */
             armVertical.set(Relay.Value.kReverse);
         }
         else if (vertArmRaise) {
@@ -135,21 +143,62 @@ public class RobotTemplate extends IterativeRobot {
             armVertical.set(Relay.Value.kOff);
         }
 
-         /*if(camStick.getRawButton(4)){
-            armLow.set(1);    
-        } 
-        else if(camStick.getRawButton(5)){
-            armLow.set(-1);
-        }
-        else{
-            armLow.set(0);
-        }*/
-            
-  
-    }
-    
+        /* 
+           Left Arm
+        */
+        leftArmRetract = false;
+        leftArmExtend = false;
         
-    
+        /* Button 7 retracts arm */
+        if (camStick.getRawButton(7)&& leftRetractedLimit.get()) {
+            leftArmRetract = true;
+        }
+        /* Button 10 Raises arm */
+        else if (camStick.getRawButton(10) && leftExtendedLimit.get()) {
+            leftArmExtend = true;
+        }
+   
+        /* Extend or retract arm */
+        if (leftArmRetract) {
+            armLeft.set(-1);
+        }
+        else if (leftArmExtend) {
+            armLeft.set(1);
+        }
+        else {
+            /* Stop motor if limit reached or neither button pressed */
+            armLeft.set(0);
+        }
+        
+         /* 
+           Right Arm
+        */
+        rightArmRetract = false;
+        rightArmExtend = false;
+        
+        /* Button 6 retracts arm */
+        if (camStick.getRawButton(6) && rightRetractedLimit.get()) {
+            rightArmRetract = true;
+        }
+        /* Button 11 Raises arm */
+        else if (camStick.getRawButton(11) && rightExtendedLimit.get()) {
+            rightArmExtend = true;
+        }
+        
+        /* Extend or retract arm */
+        if (rightArmRetract) {
+            armRight.set(-1);
+        }
+        else if (rightArmExtend) {
+            armRight.set(1);
+        }
+        else {
+            /* Stop motor if limit reached or neither button pressed */
+            armRight.set(0);
+        }
+            
+    }
+     
     /**                       
      * This function is called periodically during test mode
      */
