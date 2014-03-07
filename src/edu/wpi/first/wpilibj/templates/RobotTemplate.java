@@ -37,10 +37,10 @@ public class RobotTemplate extends IterativeRobot {
         Relay armVertical = new Relay(1);
         DigitalInput extendedLimit = new DigitalInput(1);
         DigitalInput retractedLimit = new DigitalInput(2);
-        DigitalInput leftExtendedLimit = new DigitalInput(4);
-        DigitalInput leftRetractedLimit = new DigitalInput(3);
-        DigitalInput rightExtendedLimit = new DigitalInput(5);
-        DigitalInput rightRetractedLimit = new DigitalInput(6);
+        DigitalInput leftExtendedLimit = new DigitalInput(3);
+        DigitalInput leftRetractedLimit = new DigitalInput(4);
+        DigitalInput rightExtendedLimit = new DigitalInput(6);
+        DigitalInput rightRetractedLimit = new DigitalInput(5);
         boolean vertArmLower = false;
         boolean vertArmRaise = false;
         boolean leftArmRetract = false;
@@ -87,17 +87,23 @@ public class RobotTemplate extends IterativeRobot {
     
 	public void autonomousPeriodic() {
 		
-		m_autoPeriodicLoops++;
+            m_autoPeriodicLoops++;
 
-
-		if (m_autoPeriodicLoops < (5 * /*GetLoopsPerSec()*/50)) {
-			// When on the first periodic loop in autonomous mode, start driving forwards at half speed
-			chassis.drive(-0.5, 0.0);			// drive forwards at half speed
-		}
-                else {
-			// After 2 seconds, stop the robot
-			chassis.drive(0.0, 0.0);			// stop robot
-		}
+            chassis.drive(0.0, 0.0);
+            if (m_autoPeriodicLoops < (3 * 50) && extendedLimit.get()) {
+                armVertical.set(Relay.Value.kForward);
+            }
+            else {
+                armVertical.set(Relay.Value.kOff);
+            }
+            /*if (m_autoPeriodicLoops < (5 * /*GetLoopsPerSec()*//*1)) {
+            // When on the first periodic loop in autonomous mode, start driving forwards at half speed
+            chassis.drive(0.5, 0.5);			// drive forwards at half speed
+            }
+            else {
+            // After 2 seconds, stop the robot
+            chassis.drive(0.0, 0.0);			// stop robot
+            }*/
 		
 	}
     /**
