@@ -9,6 +9,8 @@ package edu.wpi.first.wpilibj.templates;
 
 
 
+import java.util.Random;
+import java.util.Date;
 import edu.wpi.first.wpilibj.IterativeRobot;
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.RobotDrive;
@@ -52,6 +54,9 @@ public class RobotTemplate extends IterativeRobot {
         Servo camTilt = new Servo(4);
         double tiltIn;
         double panIn;
+        Random rn;
+        int rand;
+        long ms;
         
         int m_autoPeriodicLoops;
         int relayCounter;
@@ -76,6 +81,9 @@ public class RobotTemplate extends IterativeRobot {
     }
     public void autonomousInit() {
         m_autoPeriodicLoops = 0;
+        ms = (new Date()).getTime();
+        rn = new Random(ms);
+        rand = rn.nextInt();
     }
 
     /**
@@ -86,7 +94,7 @@ public class RobotTemplate extends IterativeRobot {
 	static int startSec;
     
 	public void autonomousPeriodic() {
-		
+
             m_autoPeriodicLoops++;
 
             chassis.drive(0.0, 0.0);
@@ -96,14 +104,20 @@ public class RobotTemplate extends IterativeRobot {
             else {
                 armVertical.set(Relay.Value.kOff);
             }
-            /*if (m_autoPeriodicLoops < (5 * /*GetLoopsPerSec()*//*1)) {
+            if (m_autoPeriodicLoops < (1 * /*GetLoopsPerSec()*/50)) {
             // When on the first periodic loop in autonomous mode, start driving forwards at half speed
-            chassis.drive(0.5, 0.5);			// drive forwards at half speed
+
+                if ((rand & 1) == 1){
+                    chassis.drive(0.5, 0.0);			// drive forwards at half speed
+                }
+                else {
+                    chassis.drive(-0.5, 0.0);
+                }
             }
             else {
             // After 2 seconds, stop the robot
             chassis.drive(0.0, 0.0);			// stop robot
-            }*/
+            }
 		
 	}
     /**
