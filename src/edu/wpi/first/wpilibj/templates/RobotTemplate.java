@@ -15,6 +15,7 @@ import edu.wpi.first.wpilibj.IterativeRobot;
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.RobotDrive;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.AnalogModule;
 import edu.wpi.first.wpilibj.Servo;
 import edu.wpi.first.wpilibj.Victor;
@@ -30,10 +31,20 @@ import edu.wpi.first.wpilibj.DigitalInput;
  * directory.
  */
 public class RobotTemplate extends IterativeRobot {
+    
+        final int DRIVE_DIR_FORWARD  = 0;
+        final int DRIVE_DIR_BACKWARD = 1;
+        final int DRIVE_DIR_RANDOM   = 2;
+    
+        final int DRIVE_DIST_SHORT  = 0;
+        final int DRIVE_DIST_MEDIUM = 1;
+        final int DRIVE_DIST_LONG   = 2;
+        
         RobotDrive chassis = new RobotDrive(1, 2);
         AnalogModule exampleAnalog;
         Joystick driveStick = new Joystick(1);
         Joystick camStick = new Joystick(2);
+        DriverStation driverStation = DriverStation.getInstance();
         Victor armLeft = new Victor(5);
         Victor armRight = new Victor(6);
         Relay armVertical = new Relay(1);
@@ -59,8 +70,11 @@ public class RobotTemplate extends IterativeRobot {
         long ms;
         
         int m_autoPeriodicLoops;
+        int m_autoModeDirSelect;
+        int m_autoModeDistSelect;
         int relayCounter;
     public RobotTemplate() {
+        
         this.counter = 0.0;
         
     }
@@ -72,6 +86,7 @@ public class RobotTemplate extends IterativeRobot {
      * used for any initialization code.
      */
     public void robotInit() {
+        
         chassis.setInvertedMotor(RobotDrive.MotorType.kRearRight, true);
         chassis.setInvertedMotor(RobotDrive.MotorType.kRearLeft, true);
         exampleAnalog = AnalogModule.getInstance(1);
@@ -80,50 +95,122 @@ public class RobotTemplate extends IterativeRobot {
 
     }
     public void autonomousInit() {
+        
         m_autoPeriodicLoops = 0;
+        m_autoModeDirSelect = (int) driverStation.getAnalogIn(1);
+        m_autoModeDistSelect = (int) driverStation.getAnalogIn(2);
         ms = (new Date()).getTime();
         rn = new Random(ms);
         rand = rn.nextInt();
     }
+    
+    private void autonomousDoNothing() {
+        chassis.drive(0.0, 0.0);
+    }
+    
+    private void autonomousMove(int direction, int distance) {
+        
+        double speed = 0.0;
+        double timeInSeconds = 0.0;
+        
+        m_autoPeriodicLoops++;
 
+        chassis.drive(0.0, 0.0);
+        if (m_autoPeriodicLoops < (3 * 50) && extendedLimit.get()) {
+            armVertical.set(Relay.Value.kForward);
+        }
+        else {
+            armVertical.set(Relay.Value.kOff);
+        }
+        
+        switch (direction){
+            case DRIVE_DIR_FORWARD:
+                speed = 0.5;
+                break;
+            case DRIVE_DIR_BACKWARD:
+                speed = -0.5;
+                break;
+            case DRIVE_DIR_RANDOM:
+                if ((rand & 1) == 1) {
+                    speed = 0.5;			
+                }
+                else {
+                    speed = -0.5;
+                }
+                break;
+            default:
+                speed = 0.0;
+                break;
+        }
+        
+        switch (distance){
+            case DRIVE_DIST_SHORT:
+                timeInSeconds = 0.4;
+                break;
+            case DRIVE_DIST_MEDIUM:
+                timeInSeconds = 0.6;
+                break;
+            case DRIVE_DIST_LONG:
+                timeInSeconds = 0.8;
+                break;
+            default:
+                timeInSeconds = 0.0;
+                break;
+        }
+        
+        if (m_autoPeriodicLoops < (int)(timeInSeconds * /*GetLoopsPerSec()*/50)) {
+            // When on the first periodic loop in autonomous mode, start driving forwards at half speed
+            chassis.drive(speed, 0.0);
+        }
+        else {
+            // After 2 seconds, stop the robot
+            chassis.drive(0.0, 0.0);			// stop robot
+        }
+    }
+    
     /**
      * This function is called periodically during autonomous
      */
-    
-    	static int printSec;
-	static int startSec;
-    
-	public void autonomousPeriodic() {
-
-            m_autoPeriodicLoops++;
-
-            chassis.drive(0.0, 0.0);
-            if (m_autoPeriodicLoops < (3 * 50) && extendedLimit.get()) {
-                armVertical.set(Relay.Value.kForward);
-            }
-            else {
-                armVertical.set(Relay.Value.kOff);
-            }
-            if (m_autoPeriodicLoops < (1 * /*GetLoopsPerSec()*/50)) {
-            // When on the first periodic loop in autonomous mode, start driving forwards at half speed
-
-                if ((rand & 1) == 1){
-                    chassis.drive(0.5, 0.0);			// drive forwards at half speed
-                }
-                else {
-                    chassis.drive(-0.5, 0.0);
-                }
-            }
-            else {
-            // After 2 seconds, stop the robot
-            chassis.drive(0.0, 0.0);			// stop robot
-            }
+    public void autonomousPeriodic() {
+        
+        int distance = 0;
+        
+        switch (m_autoModeDistSelect) {
+            case 0:
+                distance = DRIVE_DIST_SHORT;
+                break;
+            case 1:
+                distance = DRIVE_DIST_MEDIUM;
+                break;
+            case 2:
+            default:
+                distance = DRIVE_DIST_LONG;
+                break;
+                
+        }
+        
+        switch (m_autoModeDirSelect) {
+            default:
+            case 0:
+                autonomousDoNothing();
+                break;
+            case 1:
+                autonomousMove(DRIVE_DIR_FORWARD, distance);
+                break;
+            case 2:
+                autonomousMove(DRIVE_DIR_BACKWARD, distance);
+                break;
+            case 3:
+                autonomousMove(DRIVE_DIR_RANDOM, distance);
+                break;
+        }
 		
-	}
+    }
     /**
      * This function is called periodically during operator control
      */
     public void teleopPeriodic() {
+        
         SmartDashboard.putNumber("Counter", counter++);
         SmartDashboard.putNumber("Ultrasonic Value", exampleAnalog.getValue(1));
         SmartDashboard.putNumber("Voltage", exampleAnalog.getVoltage(1));
